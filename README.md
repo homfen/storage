@@ -14,10 +14,21 @@
 |hash|hash|否|
 
 ####getItem(key, hash)
+|名称|含义|必须|
+|----|----|----|
+|key|键|是|
+|hash|hash|否|
 
 ####removeItem(key)
+|名称|含义|必须|
+|----|----|----|
+|key|键|是|
+|hash|hash|否|
 
 ####clear(hostname)
+|名称|含义|必须|
+|----|----|----|
+|hostname|域名|否|
 未指定hostname时默认清空当前域名下的数据
 
 ####clearAll
