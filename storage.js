@@ -7,9 +7,20 @@
  * @author homfen (homfen@outlook.com)
  * @version 0.0.1
  */
-define(
-    function (require) {
+'use strict'
 
+;(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    }
+    else if (typeof exports === 'object') {
+        module.exports = factory();
+    }
+    else {
+        root.store = factory();
+    }
+})(this,
+    function () {
         var GLOBALNAME = 'storage-global';
         var GLOBALINDEX = GLOBALNAME + '-index';
         var host = location.hostname;
@@ -17,10 +28,20 @@ define(
         var topHash = location.hash.slice(1);
         var defaultStorage = null;
 
+        /**
+         * 检测storage是否可用
+         *
+         * @return {Object}
+         */
         function available() {
             return getStorage();
         }
 
+        /**
+         * 获取storage对象
+         *
+         * @return {Object} storage对象
+         */
         function getStorage() {
             if (defaultStorage) {
                 return defaultStorage;
@@ -75,12 +96,27 @@ define(
             return null;
         }
 
+        /**
+         * set方法
+         *
+         * @param {string} key 键
+         * @param {string} value 值
+         * @param {number} expire 过期时间
+         * @param {string} hash hash值
+         */
         function setItem(key, value, expire, hash) {
             key = getRealKey(key, hash);
             addKey(key, expire);
             setRealItem(key, value);
         }
 
+        /**
+         * get方法
+         *
+         * @param {string} key 键
+         * @param {string} hash 如果是子action需要传hash
+         * @return {string}
+         */
         function getItem(key, hash) {
             key = getRealKey(key, hash);
             var expire = getExpire(key);
@@ -93,12 +129,23 @@ define(
             return null;
         }
 
+        /**
+         * remove方法
+         *
+         * @param {string} key 键
+         * @param {string} hash 如果是子action需要传hash
+         */
         function removeItem(key, hash) {
             key = getRealKey(key, hash);
             removeKey(key);
             setRealItem(key, null);
         }
 
+        /**
+         * clear方法
+         *
+         * @param {string} hostName 域名，如果有则清除指定域名的数据，否则默认清除当前域名的数据
+         */
         function clear(hostName) {
             hostName = hostName ? hostName : host;
             var allKeys = getAllKeys();
@@ -112,6 +159,9 @@ define(
             delete allKeys[hostName];
         }
 
+        /**
+         * clearAll方法，清除所有的数据
+         */
         function clearAll() {
             var allKeys = getAllKeys();
             for (var hostName in allKeys) {
@@ -128,10 +178,33 @@ define(
             }
         }
 
+        /**
+         * index方法，列出所有的key
+         *
+         * @return {Object}
+         */
         function index() {
-            return getAllKeys();
+            var allKeys = getAllKeys();
+            var r = [];
+            for (var hostName in allKeys) {
+                if (allKeys.hasOwnProperty(hostName)) {
+                    var hostKeys = allKeys[hostName];
+                    for (var key in hostKeys) {
+                        if (hostKeys.hasOwnProperty(key)) {
+                            r.push(key.split('@')[1]);
+                        }
+                    }
+                }
+            }
+            return r;
         }
 
+        /**
+         * setRealItem方法
+         *
+         * @param {string} key 真实的key
+         * @param {string} value 值
+         */
         function setRealItem(key, value) {
             getStorage();
             if (defaultStorage) {
@@ -147,6 +220,12 @@ define(
             }
         }
 
+        /**
+         * getRealItem方法
+         *
+         * @param {string} key 真实的key
+         * @return {string}
+         */
         function getRealItem(key) {
             getStorage();
             if (defaultStorage) {
@@ -155,17 +234,35 @@ define(
             return null;
         }
 
+        /**
+         * getRealKey方法
+         *
+         * @param {string} key 传入的key
+         * @param {string} hash 如果在子action需要传入hash值，以便保存到正确的位置
+         * @return {string}
+         */
         function getRealKey(key, hash) {
             return host + path
                 + '#' + (hash ? hash : topHash)
                 + '@' + key;
         }
 
+        /**
+         * getAllKeys获取所有的key
+         *
+         * @return {Object}
+         */
         function getAllKeys() {
             var allKeys = getRealItem(GLOBALINDEX);
             return JSON.parse(allKeys);
         }
 
+        /**
+         * addKey增加一个key
+         *
+         * @param {string} key 真实的key
+         * @param {number} expire 过期时间
+         */
         function addKey(key, expire) {
             expire = expire ? expire : Number.MAX_VALUE;
             var allKeys = getAllKeys();
@@ -179,6 +276,11 @@ define(
             setRealItem(GLOBALINDEX, JSON.stringify(allKeys));
         }
 
+        /**
+         * removeKey移除key
+         *
+         * @param {string} key 真实的key
+         */
         function removeKey(key) {
             var allKeys = getAllKeys();
             var hostKeys = allKeys[host];
@@ -188,6 +290,12 @@ define(
             setRealItem(GLOBALINDEX, JSON.stringify(allKeys));
         }
 
+        /**
+         * getExpire获取key对应的过期时间
+         *
+         * @param {string} key 真实的key
+         * @return {number}
+         */
         function getExpire(key) {
             var allKeys = getAllKeys();
             var hostKeys = allKeys[host];
