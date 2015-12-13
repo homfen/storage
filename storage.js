@@ -5,7 +5,7 @@
  *
  * @file storage
  * @author homfen (homfen@outlook.com)
- * @version 0.0.1
+ * @version 0.0.2
  */
 'use strict'
 
@@ -17,7 +17,7 @@
         module.exports = factory();
     }
     else {
-        root.store = factory();
+        root.storage = factory();
     }
 })(this,
     function () {
