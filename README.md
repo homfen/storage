@@ -1,7 +1,10 @@
 ##Storage
 支持localStorage、sessionStorage、IE userData
+
 支持单页应用，通过hash值来存储
+
 支持设置过期时间
+
 
 ###方法
 ####available
